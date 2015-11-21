@@ -29,6 +29,33 @@ namespace WeatherForecast
             button1.BackColor = Color.Red;
             richTextBox1.Text = "";
 
+
+            string[] FilesList = Directory.GetFiles(ConfigurationSettings.AppSettings["OutputPath"].ToString().Trim());
+            foreach (string item in FilesList)
+            {
+                try
+                {
+                    if (File.GetLastAccessTime(item) < DateTime.Now.AddHours(-48))
+                    {
+                        File.Delete(item);
+                        richTextBox1.Text += (item) + " *Deleted* \n";
+                        richTextBox1.SelectionStart = richTextBox1.Text.Length;
+                        richTextBox1.ScrollToCaret();
+                        Application.DoEvents();
+                    }
+                }
+                catch (Exception Exp)
+                {
+                    richTextBox1.Text += (Exp) + " \n";
+                    richTextBox1.SelectionStart = richTextBox1.Text.Length;
+                    richTextBox1.ScrollToCaret();
+                    Application.DoEvents();
+                }
+
+            }
+
+
+
             richTextBox1.Text += "START JOB \n";
             richTextBox1.SelectionStart = richTextBox1.Text.Length;
             richTextBox1.ScrollToCaret();
