@@ -6,8 +6,11 @@ using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Net;
 using System.Text;
 using System.Windows.Forms;
+using System.Xml;
+using System.Xml.Serialization;
 using WeatherForecast.MyDBTableAdapters;
 
 namespace WeatherForecast
@@ -18,10 +21,91 @@ namespace WeatherForecast
         {
             InitializeComponent();
         }
+        protected void Logger(string log)
+        {
+            try
+            {
+                if (richTextBox1.Lines.Length > 400)
+                {
+                    richTextBox1.Text = "";
+                }
+                richTextBox1.Text += "[" + DateTime.Now.ToString() + "] " + (log) + " \n ======================= \n";
+                richTextBox1.SelectionStart = richTextBox1.Text.Length;
+                richTextBox1.ScrollToCaret();
+                Application.DoEvents();
+            }
+            catch { }
+        }
+        public Cities getData(Cities ct )
+        {
 
+            try
+            {
+                Logger(ct.Name);
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://artgroup.feeds.meteonews.net/forecasts/id/" + ct.Code + ".xml?lang=en&cumulation=24h&end=2d");
+                request.Credentials = new System.Net.NetworkCredential("artgroup", "Ar+HIspGr0p");
+                WebResponse response = request.GetResponse();
+                Stream stream = response.GetResponseStream();
+                StreamReader readerResult = new StreamReader(stream);
+
+                var result = readerResult.ReadToEnd();
+                stream.Dispose();
+                readerResult.Dispose();
+
+                XmlDocument xmlDoc = new XmlDocument();
+                xmlDoc.LoadXml(result);
+
+
+
+
+                XmlNodeList elemListMin = xmlDoc.GetElementsByTagName("temp_min");
+                if (elemListMin.Count == 2)
+                {
+                    ct.Min = elemListMin[0].InnerText;
+                    ct.Min2 = elemListMin[1].InnerText;
+                    Logger("Min1:" + ct.Min);
+                    Logger("Min2:" + ct.Min2);
+                }
+
+
+                XmlNodeList elemListMax = xmlDoc.GetElementsByTagName("temp_max");
+                if (elemListMax.Count == 2)
+                {
+                    ct.Max = elemListMax[0].InnerText;
+                    ct.Max2 = elemListMax[1].InnerText;
+                    Logger("Max1:" + ct.Max);
+                    Logger("Max2:" + ct.Max2);
+
+                }
+
+                XmlNodeList elemListState = xmlDoc.GetElementsByTagName("txt");
+                if (elemListState.Count == 2)
+                {
+                    ct.State = elemListState[0].InnerText;
+                    ct.State2 = elemListState[1].InnerText;
+                    Logger("State:" + ct.State);
+                    Logger("State2:" + ct.State2);
+
+                }
+            }
+            catch (Exception Exp)
+            {
+                ct.Max = "0";
+                ct.Max2= "0";
+                ct.Min= "0";
+                ct.Min2="0";
+                ct.State= "0";
+                ct.State2= "0";
+                richTextBox1.Text += Exp.Message + "  \n";
+            }
+
+
+            return ct;
+        }
         private void button1_Click(object sender, EventArgs e)
         {
             timer1.Enabled = false;
+
 
 
             button1.ForeColor = Color.White;
@@ -38,48 +122,71 @@ namespace WeatherForecast
                     if (File.GetLastAccessTime(item) < DateTime.Now.AddHours(-48))
                     {
                         File.Delete(item);
-                        richTextBox1.Text += (item) + " *Deleted* \n";
-                        richTextBox1.SelectionStart = richTextBox1.Text.Length;
-                        richTextBox1.ScrollToCaret();
-                        Application.DoEvents();
+                        Logger(item + " Deleted");
                     }
                 }
                 catch (Exception Exp)
                 {
-                    richTextBox1.Text += (Exp) + " \n";
-                    richTextBox1.SelectionStart = richTextBox1.Text.Length;
-                    richTextBox1.ScrollToCaret();
-                    Application.DoEvents();
+                    Logger("Error Delete" + Exp.Message);
                 }
-
             }
 
+            List<Cities> Cts = new List<Cities>();
+            Cts.Add(new Cities{ Name= "ABUJA", Code= "G2352778" });
+            Cts.Add(new Cities{ Name= "BUENOS AIRES", Code= "G3435910" });
+            Cts.Add(new Cities{ Name= "Melborne", Code= "G4075766" });
+            Cts.Add(new Cities{ Name= "Brasilia", Code= "G3469058" });
+            Cts.Add(new Cities{ Name= "beijing", Code= "G1816670" });
+            Cts.Add(new Cities{ Name= "Havana", Code= "G3553478" });
+            Cts.Add(new Cities{ Name= "Cairo", Code= "G360630" });
+            Cts.Add(new Cities{ Name= "Paris", Code= "G2988507" });
+            Cts.Add(new Cities{ Name= "Berlin", Code= "G2950159" });
+            Cts.Add(new Cities{ Name= "New Delhi", Code= "G1261481" });
+            Cts.Add(new Cities{ Name= "Isfahan", Code= "G418863" });
+            Cts.Add(new Cities{ Name= "Tehran", Code= "G112931" });
+            Cts.Add(new Cities{ Name= "Baghdad", Code= "G98182" });
+            Cts.Add(new Cities{ Name= "Dublin", Code= "G2964574" });
+            Cts.Add(new Cities{ Name= "Tokyo", Code= "G1850147" });
+            Cts.Add(new Cities{ Name= "Beirut", Code= "G276781" });
+            Cts.Add(new Cities{ Name= "Mexico City", Code= "G3530597" });
+            Cts.Add(new Cities{ Name= "Casablanca", Code= "G2553604" });
+            Cts.Add(new Cities{ Name= "Karachi", Code= "G1174872" });
+            Cts.Add(new Cities{ Name= "JERUSALEM (AL QUDS)", Code= "G7870654" });
+            Cts.Add(new Cities{ Name= "Doha", Code= "G290030" });
+            Cts.Add(new Cities{ Name= "Moscow", Code= "G524901" });
+            Cts.Add(new Cities{ Name= "Mecca", Code= "G104515" });
+            Cts.Add(new Cities{ Name= "Pretoria", Code= "G964137" });
+            Cts.Add(new Cities{ Name= "Madrid", Code= "G3117735" });
+            Cts.Add(new Cities{ Name= "Damascus", Code= "G170654" });
+            Cts.Add(new Cities{ Name= "Tunis", Code= "G2464470" });
+            Cts.Add(new Cities{ Name= "London", Code= "G2643743" });
+            Cts.Add(new Cities{ Name= "New York", Code= "G5128581" });
+            Cts.Add(new Cities{ Name= "Washington", Code= "G4140963" });
+            Cts.Add(new Cities{ Name= "Caracas", Code= "G3646738" });
+            Cts.Add(new Cities{ Name= "Sana'a", Code= "G7789599" });
 
+            List<Cities> CtsFinal = new List<Cities>();
+            foreach (var item in Cts)
+            {
+                CtsFinal.Add(getData(item));
+            }
 
-            richTextBox1.Text += "START JOB \n";
-            richTextBox1.SelectionStart = richTextBox1.Text.Length;
-            richTextBox1.ScrollToCaret();
-            Application.DoEvents();
+            Logger("Start Job");
 
 
             //Collect Weather Data
-            CitiesTableAdapter Ta = new CitiesTableAdapter();
-            MyDB.CitiesDataTable Dt = Ta.SelectAllCities();
+            //CitiesTableAdapter Ta = new CitiesTableAdapter();
+            //MyDB.CitiesDataTable Dt = Ta.SelectAllCities();
 
             StringBuilder Data = new StringBuilder();
-            Data.AppendLine("FirstDay = \"" + DateTime.Now.DayOfWeek.ToString() + "\"");
-            Data.AppendLine("SecondDay = \"" + DateTime.Now.AddDays(1).DayOfWeek.ToString() + "\"");
+            Data.AppendLine("FirstDay = \"" + DateTime.Now.AddDays(1).DayOfWeek.ToString() + "\"");
+            Data.AppendLine("SecondDay = \"" + DateTime.Now.AddDays(2).DayOfWeek.ToString() + "\"");
             //Generate XML file:
-            for (int i = 0; i < Dt.Rows.Count; i++)
+            for (int i = 0; i < CtsFinal.Count; i++)
             {
-                richTextBox1.Text += Dt[i]["CityName"].ToString().Trim() + ":\n";
-                richTextBox1.SelectionStart = richTextBox1.Text.Length;
-                richTextBox1.ScrollToCaret();
-                Application.DoEvents();
-                //Math.Round(double.Parse(Dt[i]["Forecasts1Min"].ToString())-(273.15));
-
+                Logger(CtsFinal[i].Name+" XML");
                 //Weather Format: ["City","1st Day Min","1st Day Max","2nd Day Min","2nd Day Max"]	
-                Data.AppendLine("City" + (i + 1).ToString() + "=[ \"" + Dt[i]["CityName"].ToString().Trim().Replace("\n", "") + "\",\"" + Math.Round(double.Parse(Dt[i]["Forecasts1Min"].ToString()) - (273.15)) + "\",\"" + Math.Round(double.Parse(Dt[i]["Forecasts1Max"].ToString()) - (273.15)) + "\",\"" + Math.Round(double.Parse(Dt[i]["Forecasts2Min"].ToString()) - (273.15)) + "\",\"" + Math.Round(double.Parse(Dt[i]["Forecasts2max"].ToString()) - (273.15)) + "\"]");
+                Data.AppendLine("City" + (i + 1).ToString() + "=[ \"" + CtsFinal[i].Name.ToString().Trim().Replace("\n", "") + "\",\"" + CtsFinal[i].Min.ToString() + "\",\"" + CtsFinal[i].Max.ToString() + "\",\"" + CtsFinal[i].Min2.ToString() + "\",\"" + CtsFinal[i].Max2 + "\"]");
 
                 //Copy Status Video:
                 string MainStatusDir = ConfigurationSettings.AppSettings["StatusSource"].ToString().Trim();
@@ -88,68 +195,71 @@ namespace WeatherForecast
 
                 if (!Directory.Exists(MainStatusDirDest + "City (" + (i + 1).ToString() + ")" + "\\Day1\\"))
                     Directory.CreateDirectory(MainStatusDirDest + "City (" + (i + 1).ToString() + ")" + "\\Day1\\");
-                switch (Dt[i]["statusmain1"].ToString().Trim())
-                {
-                    case "Thunderstorm":
-                        File.Copy(MainStatusDir + "Lightening\\WP.mov", MainStatusDirDest + "City (" + (i + 1).ToString() + ")" + "\\Day1\\WP.mov", true);
-                        break;
-                    case "Drizzle":
-                        File.Copy(MainStatusDir + "Rain\\WP.mov", MainStatusDirDest + "City (" + (i + 1).ToString() + ")" + "\\Day1\\WP.mov", true);
-                        break;
-                    case "Rain":
-                        File.Copy(MainStatusDir + "Rain\\WP.mov", MainStatusDirDest + "City (" + (i + 1).ToString() + ")" + "\\Day1\\WP.mov", true);
-                        break;
-                    case "Snow":
-                        File.Copy(MainStatusDir + "Snow\\WP.mov", MainStatusDirDest + "City (" + (i + 1).ToString() + ")" + "\\Day1\\WP.mov", true);
-                        break;
-                    case "Atmosphere":
-                        File.Copy(MainStatusDir + "Sunny\\WP.mov", MainStatusDirDest + "City (" + (i + 1).ToString() + ")" + "\\Day1\\WP.mov", true);
-                        break;
-                    case "Clouds":
-                        File.Copy(MainStatusDir + "Cloudy\\WP.mov", MainStatusDirDest + "City (" + (i + 1).ToString() + ")" + "\\Day1\\WP.mov", true);
-                        break;
-                    case "Clear":
-                        File.Copy(MainStatusDir + "Sunny\\WP.mov", MainStatusDirDest + "City (" + (i + 1).ToString() + ")" + "\\Day1\\WP.mov", true);
-                        break;
-                    default:
-                        File.Copy(MainStatusDir + "Sunny\\WP.mov", MainStatusDirDest + "City (" + (i + 1).ToString() + ")" + "\\Day1\\WP.mov", true);
-                        break;
-                }
+
+                if (CtsFinal[i].State.ToLower().Contains("thunderstorm"))
+                    File.Copy(MainStatusDir + "Lightening\\WP.mov", MainStatusDirDest + "City (" + (i + 1).ToString() + ")" + "\\Day1\\WP.mov", true);
+                else
+                if (CtsFinal[i].State.ToLower().Contains("drizzle"))
+                    File.Copy(MainStatusDir + "Rain\\WP.mov", MainStatusDirDest + "City (" + (i + 1).ToString() + ")" + "\\Day1\\WP.mov", true);
+                else
+                if (CtsFinal[i].State.ToLower().Contains("rain"))
+                    File.Copy(MainStatusDir + "Rain\\WP.mov", MainStatusDirDest + "City (" + (i + 1).ToString() + ")" + "\\Day1\\WP.mov", true);
+                else
+            if (CtsFinal[i].State.ToLower().Contains("snow"))
+                    File.Copy(MainStatusDir + "Snow\\WP.mov", MainStatusDirDest + "City (" + (i + 1).ToString() + ")" + "\\Day1\\WP.mov", true);
+                else
+            if (CtsFinal[i].State.ToLower().Contains("atmosphere"))
+                    File.Copy(MainStatusDir + "Sunny\\WP.mov", MainStatusDirDest + "City (" + (i + 1).ToString() + ")" + "\\Day1\\WP.mov", true);
+                else
+            if (CtsFinal[i].State.ToLower().Contains("clouds"))
+                    File.Copy(MainStatusDir + "Cloudy\\WP.mov", MainStatusDirDest + "City (" + (i + 1).ToString() + ")" + "\\Day1\\WP.mov", true);
+                else
+            if (CtsFinal[i].State.ToLower().Contains("clear"))
+                    File.Copy(MainStatusDir + "Sunny\\WP.mov", MainStatusDirDest + "City (" + (i + 1).ToString() + ")" + "\\Day1\\WP.mov", true);
+                else
+
+                    File.Copy(MainStatusDir + "Sunny\\WP.mov", MainStatusDirDest + "City (" + (i + 1).ToString() + ")" + "\\Day1\\WP.mov", true);
+
 
                 if (!Directory.Exists(MainStatusDirDest + "City (" + (i + 1).ToString() + ")" + "\\Day2\\"))
                     Directory.CreateDirectory(MainStatusDirDest + "City (" + (i + 1).ToString() + ")" + "\\Day2\\");
-                switch (Dt[i]["statusmain2"].ToString().Trim())
-                {
-                    case "Thunderstorm":
-                        File.Copy(MainStatusDir + "Lightening\\WP.mov", MainStatusDirDest + "City (" + (i + 1).ToString() + ")" + "\\Day2\\WP.mov", true);
-                        break;
-                    case "Drizzle":
-                        File.Copy(MainStatusDir + "Rain\\WP.mov", MainStatusDirDest + "City (" + (i + 1).ToString() + ")" + "\\Day2\\WP.mov", true);
-                        break;
-                    case "Rain":
-                        File.Copy(MainStatusDir + "Rain\\WP.mov", MainStatusDirDest + "City (" + (i + 1).ToString() + ")" + "\\Day2\\WP.mov", true);
-                        break;
-                    case "Snow":
-                        File.Copy(MainStatusDir + "Snow\\WP.mov", MainStatusDirDest + "City (" + (i + 1).ToString() + ")" + "\\Day2\\WP.mov", true);
-                        break;
-                    case "Atmosphere":
-                        File.Copy(MainStatusDir + "Sunny\\WP.mov", MainStatusDirDest + "City (" + (i + 1).ToString() + ")" + "\\Day2\\WP.mov", true);
-                        break;
-                    case "Clouds":
-                        File.Copy(MainStatusDir + "Cloudy\\WP.mov", MainStatusDirDest + "City (" + (i + 1).ToString() + ")" + "\\Day2\\WP.mov", true);
-                        break;
-                    case "Clear":
-                        File.Copy(MainStatusDir + "Sunny\\WP.mov", MainStatusDirDest + "City (" + (i + 1).ToString() + ")" + "\\Day2\\WP.mov", true);
-                        break;
-                    default:
-                        File.Copy(MainStatusDir + "Sunny\\WP.mov", MainStatusDirDest + "City (" + (i + 1).ToString() + ")" + "\\Day2\\WP.mov", true);
-                        break;
-                }
+
+                if (CtsFinal[i].State2.ToLower().Contains("thunderstorm"))
+                    File.Copy(MainStatusDir + "Lightening\\WP.mov", MainStatusDirDest + "City (" + (i + 1).ToString() + ")" + "\\Day2\\WP.mov", true);
+                else
+               if (CtsFinal[i].State2.ToLower().Contains("drizzle"))
+                    File.Copy(MainStatusDir + "Rain\\WP.mov", MainStatusDirDest + "City (" + (i + 1).ToString() + ")" + "\\Day2\\WP.mov", true);
+                else
+               if (CtsFinal[i].State2.ToLower().Contains("rain"))
+                    File.Copy(MainStatusDir + "Rain\\WP.mov", MainStatusDirDest + "City (" + (i + 1).ToString() + ")" + "\\Day2\\WP.mov", true);
+                else
+           if (CtsFinal[i].State2.ToLower().Contains("snow"))
+                    File.Copy(MainStatusDir + "Snow\\WP.mov", MainStatusDirDest + "City (" + (i + 1).ToString() + ")" + "\\Day2\\WP.mov", true);
+                else
+           if (CtsFinal[i].State2.ToLower().Contains("atmosphere"))
+                    File.Copy(MainStatusDir + "Sunny\\WP.mov", MainStatusDirDest + "City (" + (i + 1).ToString() + ")" + "\\Day2\\WP.mov", true);
+                else
+           if (CtsFinal[i].State2.ToLower().Contains("clouds"))
+                    File.Copy(MainStatusDir + "Cloudy\\WP.mov", MainStatusDirDest + "City (" + (i + 1).ToString() + ")" + "\\Day2\\WP.mov", true);
+                else
+           if (CtsFinal[i].State2.ToLower().Contains("clear"))
+                    File.Copy(MainStatusDir + "Sunny\\WP.mov", MainStatusDirDest + "City (" + (i + 1).ToString() + ")" + "\\Day2\\WP.mov", true);
+                else
+
+                    File.Copy(MainStatusDir + "Sunny\\WP.mov", MainStatusDirDest + "City (" + (i + 1).ToString() + ")" + "\\Day2\\WP.mov", true);
+
             }
             //Save Xml File:
-            StreamWriter s = new StreamWriter(ConfigurationSettings.AppSettings["DataPath"].ToString().Trim());
-            s.Write(Data);
-            s.Dispose();
+            try
+            {
+                StreamWriter s = new StreamWriter(ConfigurationSettings.AppSettings["DataPath"].ToString().Trim());
+                s.Write(Data);
+                s.Dispose();
+            }
+            catch (Exception Exp)
+            {
+                Logger("Save XML" + Exp.Message);
+            }
 
             //Render Video:
             render();
@@ -193,14 +303,7 @@ namespace WeatherForecast
             string line;
             while ((line = reader.ReadLine()) != null)
             {
-                if (richTextBox1.Lines.Length > 3)
-                {
-                    richTextBox1.Text = "";
-                }
-                richTextBox1.Text += (line) + " \n";
-                richTextBox1.SelectionStart = richTextBox1.Text.Length;
-                richTextBox1.ScrollToCaret();
-                Application.DoEvents();
+                Logger(line);
             }
             proc.Close();
 
@@ -209,17 +312,12 @@ namespace WeatherForecast
                 string StaticDestFileName = ConfigurationSettings.AppSettings["ScheduleDestFileName"].ToString().Trim();
                 // File.Delete(StaticDestFileName);
                 File.Copy(ConfigurationSettings.AppSettings["OutputPath"].ToString().Trim() + ConfigurationSettings.AppSettings["OutPutFileName"].ToString().Trim() + "_" + DateTimeStr + ".mp4", StaticDestFileName, true);
-                richTextBox1.Text += "COPY FINAL:" + StaticDestFileName + " \n";
-                richTextBox1.SelectionStart = richTextBox1.Text.Length;
-                richTextBox1.ScrollToCaret();
-                Application.DoEvents();
+                Logger("COPY FINAL:" + StaticDestFileName);
+              
             }
             catch (Exception Ex)
             {
-                richTextBox1.Text += Ex.Message + " \n";
-                richTextBox1.SelectionStart = richTextBox1.Text.Length;
-                richTextBox1.ScrollToCaret();
-                Application.DoEvents();
+                Logger(Ex.Message);
             }
         }
 
