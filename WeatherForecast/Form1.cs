@@ -181,13 +181,13 @@ namespace WeatherForecast
                 Cts.Add(new Cities { Name = "Casablanca", Code = "G2553604" });
                 Cts.Add(new Cities { Name = "Damascus", Code = "G170654" });
                 Cts.Add(new Cities { Name = "Havana", Code = "G3553478" });
-                Cts.Add(new Cities { Name = "Mashhad", Code = "G124665" });
-                Cts.Add(new Cities { Name = "JERUSALEM (AL QUDS)", Code = "G7870654" });
+                Cts.Add(new Cities { Name = "Jerusalem (AL QUDS)", Code = "G7870654" });
                 Cts.Add(new Cities { Name = "Karachi", Code = "G1174872" });
                 Cts.Add(new Cities { Name = "Kuwait City", Code = "G285787" });
                 Cts.Add(new Cities { Name = "Lisbon", Code = "G2267057" });
                 Cts.Add(new Cities { Name = "London", Code = "G2643743" });
                 Cts.Add(new Cities { Name = "Madrid", Code = "G3117735" });
+                Cts.Add(new Cities { Name = "Mashhad", Code = "G124665" });
                 Cts.Add(new Cities { Name = "Mecca", Code = "G104515" });
                 Cts.Add(new Cities { Name = "Melbourne", Code = "G4075766" });
                 Cts.Add(new Cities { Name = "Mexico City", Code = "G3530597" });
