@@ -200,7 +200,7 @@ namespace WeatherForecast
                 Cts.Add(new Cities { Name = "Tehran", Code = "G112931" });
                 Cts.Add(new Cities { Name = "Tokyo", Code = "G1850147" });
                 Cts.Add(new Cities { Name = "Tunis", Code = "G2464470" });
-                Cts.Add(new Cities { Name = "Washington", Code = "G4140963" });
+                Cts.Add(new Cities { Name = "Washington, D.C.", Code = "G4140963" });
 
                 List<Cities> CtsFinal = new List<Cities>();
                 foreach (var item in Cts)
